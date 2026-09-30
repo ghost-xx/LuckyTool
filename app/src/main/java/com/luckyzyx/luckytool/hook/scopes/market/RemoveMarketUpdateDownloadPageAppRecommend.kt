@@ -77,28 +77,36 @@ class RemoveMarketUpdateDownloadPageAppRecommend(val dexKitBridge: DexKitBridge)
                 }
             }
         }.apply {
-            checkDataList("RemoveMarketUpdatePageAppRecommend APPUpdateItemHolder")
-            single().name.toClass().resolve().apply {
-                firstMethodOrNull {
-                    parameters(
-                        cardDto, String::class, VagueType,
-                        Map::class, Boolean::class, Long::class
-                    )
-                    returnType(Void.TYPE)
-                }?.hook {
-                    intercept()
-                }
+            if (size != 1) return@apply
+            val holderClass = single().name.toClass()
+            val cardClass = cardDto.toClassOrNull() ?: return@apply
+            val hasCardBind = holderClass.declaredMethods.any { method ->
+                method.parameterTypes.firstOrNull() == cardClass &&
+                    method.returnType == Void.TYPE
+            }
+            if (!hasCardBind) return@apply
+            holderClass.resolve().firstMethod {
+                parameters(
+                    cardDto, String::class, VagueType,
+                    Map::class, Boolean::class, Long::class
+                )
+                returnType(Void.TYPE)
+            }.hook {
+                intercept()
             }
         }
 
-        //Source AppUpdateFragmentV2
-        "com.heytap.cdo.client.ui.upgrademgrv2.AppUpdateFragmentV2".toClassOrNull()?.let {
+        listOf(
+            "com.heytap.cdo.client.ui.upgrademgrv2.AppUpdateFragmentV2",
+            "com.heytap.market.appmanage.core.upgrade.upgrademgr.recyclerview.AppUpdateFragment"
+        ).forEach { fragmentName ->
+        fragmentName.toClassOrNull()?.let {
             dexKitBridge.findClass {
                 matcher {
                     className(it.name)
                 }
             }.apply {
-                checkDataList("RemoveMarketUpdatePageAppRecommend AppUpdateFragmentV2")
+                if (isEmpty()) return@apply
                 findMethod {
                     matcher {
                         paramTypes(List::class.java)
@@ -109,7 +117,7 @@ class RemoveMarketUpdateDownloadPageAppRecommend(val dexKitBridge: DexKitBridge)
                         usingNumbers(114.0F)
                     }
                 }.apply {
-                    checkDataList("RemoveMarketUpdatePageAppRecommend addDataAndNotifyChanged")
+                    if (size != 1) return@apply
                     it.resolve().firstMethod {
                         name = single().name
                         parameters(List::class)
@@ -129,7 +137,7 @@ class RemoveMarketUpdateDownloadPageAppRecommend(val dexKitBridge: DexKitBridge)
                         usingStrings("mRecommendUpdateContainer", "mNormalUpdateContainer")
                     }
                 }.apply {
-                    checkDataList("RemoveMarketUpdatePageAppRecommend AutoScrollWhenUpdateAll")
+                    if (size != 1) return@apply
                     it.resolve().firstMethod {
                         name = single().name
                         parameters(Boolean::class)
@@ -138,6 +146,7 @@ class RemoveMarketUpdateDownloadPageAppRecommend(val dexKitBridge: DexKitBridge)
                     }
                 }
             }
+        }
         }
     }
 }

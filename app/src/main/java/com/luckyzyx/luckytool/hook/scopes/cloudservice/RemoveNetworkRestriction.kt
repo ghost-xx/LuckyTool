@@ -15,36 +15,48 @@ class RemoveNetworkRestriction(val dexKitBridge: DexKitBridge) : YukiBaseHooker(
         //Source RestoreCheck / WifiCheck -> check -> BackupRestoreCode -> NO_WIFI / SUCCESS
         //Source NetworkUtil -> 2 == ?() -> getSystemService -> connectivity
         //Search Const.Callback.NetworkState.NetworkType.NETWORK_MOBILE -> ? 1 : 0 -> Method
-        dexKitBridge.findClass {
-            matcher {
-                methods {
-                    add {
-                        paramCount(0)
-                        returnType(Int::class.java)
-                        usingStrings("connectivity")
-                        usingNumbers(0, 1, 2)
-                    }
-                    add {
-                        paramTypes(Int::class.java)
-                        returnType(Boolean::class.java)
-                    }
-                    add {
-                        paramTypes(Context::class.java)
-                        returnType(Boolean::class.java)
-                        usingStrings("NetworkUtil", "connectivity", "isMobileDataNetwork")
-                    }
-                    add {
-                        paramTypes(Context::class.java)
-                        returnType(Boolean::class.java)
-                        usingStrings("NetworkUtil", "connectivity", "isNetworkConnected")
-                    }
-                }
+        val network = listOf(
+            "isMobileDataNetwork" to "isNetworkConnected",
+            "isMobileDataNetwork,context is null.return it." to "isNetworkConnected true"
+        ).firstNotNullOfOrNull { (mobileLog, connectedLog) ->
+            findNetwork(mobileLog, connectedLog).takeIf { it.size == 1 }
+        }
+        if (network == null) {
+            findNetwork(
+                "isMobileDataNetwork,context is null.return it.",
+                "isNetworkConnected true"
+            ).checkDataList("RemoveNetworkRestriction")
+            return
+        }
+        network.single().name.toClass().resolve().apply {
+            method { emptyParameters();returnType = Int::class }.hookAll {
+                after { if (result<Int>() == 1) result = 2 }
             }
-        }.apply {
-            checkDataList("RemoveNetworkRestriction")
-            single().name.toClass().resolve().apply {
-                method { emptyParameters();returnType = Int::class }.hookAll {
-                    after { if (result<Int>() == 1) result = 2 }
+        }
+    }
+
+    private fun findNetwork(mobileLog: String, connectedLog: String) = dexKitBridge.findClass {
+        matcher {
+            methods {
+                add {
+                    paramCount(0)
+                    returnType(Int::class.java)
+                    usingStrings("connectivity")
+                    usingNumbers(0, 1, 2)
+                }
+                add {
+                    paramTypes(Int::class.java)
+                    returnType(Boolean::class.java)
+                }
+                add {
+                    paramTypes(Context::class.java)
+                    returnType(Boolean::class.java)
+                    usingStrings("NetworkUtil", "connectivity", mobileLog)
+                }
+                add {
+                    paramTypes(Context::class.java)
+                    returnType(Boolean::class.java)
+                    usingStrings("NetworkUtil", "connectivity", connectedLog)
                 }
             }
         }

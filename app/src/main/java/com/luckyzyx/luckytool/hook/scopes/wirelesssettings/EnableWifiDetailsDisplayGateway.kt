@@ -34,11 +34,19 @@ class EnableWifiDetailsDisplayGateway(val dexKitBridge: DexKitBridge) : YukiBase
             findMethod {
                 matcher {
                     paramCount(0)
-//                    returnType(Boolean::class.java)
                     usingStrings("updateIpInfo")
+                }
+            }.let { found ->
+                if (found.size == 1) found
+                else findMethod {
+                    matcher {
+                        paramCount(0)
+                        usingStrings("updateIpInfo: LinkProperties is null.")
+                    }
                 }
             }.apply {
                 checkDataList("EnableWifiDetailsDisplayGateway Summary")
+                if (size != 1) return@apply
                 single().className.toClass().resolve().apply {
                     firstMethod {
                         name = single().methodName

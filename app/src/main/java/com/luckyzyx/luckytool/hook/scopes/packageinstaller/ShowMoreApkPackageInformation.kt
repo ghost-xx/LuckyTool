@@ -48,9 +48,16 @@ class ShowMoreApkPackageInformation(val dexKitBridge: DexKitBridge) : YukiBaseHo
                 matcher {
                     usingStrings("loadApkInfo")
                 }
-            }.apply {
-                checkDataList("loadApkInfo")
-            }.singleOrNull() ?: return
+            }.let { found ->
+                if (found.size == 1) found.single()
+                else findMethod {
+                    matcher {
+                        usingStrings("ApkInfoView loadApkInfo error:")
+                    }
+                }.apply {
+                    checkDataList("loadApkInfo")
+                }.singleOrNull()
+            } ?: return
         }.singleOrNull() ?: return
 
         //Source ApkInfo

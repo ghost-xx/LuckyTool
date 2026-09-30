@@ -3,6 +3,7 @@ package com.luckyzyx.luckytool.hook.hookers
 import android.os.SystemProperties
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.luckyzyx.luckytool.hook.globals.HookGlobalSystemProperties
+import com.luckyzyx.luckytool.hook.scopes.ota.DisableSystemUpdate
 import com.luckyzyx.luckytool.hook.scopes.ota.EnableOpexLocalInstall
 import com.luckyzyx.luckytool.hook.scopes.ota.HookNotificationHelper
 import com.luckyzyx.luckytool.hook.scopes.ota.HookOTADialogHelper
@@ -18,6 +19,10 @@ object HookOplusOta : YukiBaseHooker() {
         val osCode = getOSVersionCode
 
         loadHooker(HookGlobalSystemProperties)
+
+        if (prefs(ModulePrefs).getBoolean("disable_system_update", false)) {
+            loadHooker(DisableSystemUpdate)
+        }
 
         //local_update_failed_not_match 安装包不匹配
         //local_update_failed_read_exception 读取文件错误

@@ -947,6 +947,8 @@
     <!--OplusOta-->
     <string name="remove_ota_notify_install_success">Remove the OTA installation success notification</string>
     <string name="remove_ota_auto_download_dialog">Remove the OTA auto download dialog</string>
+    <string name="disable_system_update">Disable system update</string>
+    <string name="disable_system_update_summary">Stop checking, downloading, and installing system updates. Restart Software Update to apply</string>
     
     <!--OplusOta-->
     <string name="get_ota_verify_result">Changed partition</string>

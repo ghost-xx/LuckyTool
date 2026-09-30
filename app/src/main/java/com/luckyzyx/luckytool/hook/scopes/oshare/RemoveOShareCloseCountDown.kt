@@ -34,8 +34,18 @@ class RemoveOShareCloseCountDown(val dexKitBridge: DexKitBridge) : YukiBaseHooke
                         returnType(Long::class.java)
                         usingStrings("getSwitchTimeOut")
                     }
+                }.let { found ->
+                    if (found.size == 1) found
+                    else findMethod {
+                        matcher {
+                            paramTypes(Context::class.java)
+                            returnType(Long::class.java)
+                            usingStrings("getSwitchTimeOut = ")
+                        }
+                    }
                 }.apply {
                     checkDataList("OShareFeatureConfig getSwitchTimeOut")
+                    if (size != 1) return@apply
                     single().className.toClass().resolve().apply {
                         firstMethod {
                             name = single().name
@@ -65,8 +75,17 @@ class RemoveOShareCloseCountDown(val dexKitBridge: DexKitBridge) : YukiBaseHooke
                         paramTypes(Context::class.java, Long::class.java)
                         usingStrings("updateLastTurnOnTime", "key_last_turn_on_time")
                     }
+                }.let { found ->
+                    if (found.size == 1) found
+                    else findMethod {
+                        matcher {
+                            paramTypes(Context::class.java, Long::class.java)
+                            usingStrings("updateLastTurnOnTime time  = ", "key_last_turn_on_time")
+                        }
+                    }
                 }.apply {
                     checkDataList("SpUtils updateLastTurnOnTime")
+                    if (size != 1) return@apply
                     single().className.toClass().resolve().apply {
                         firstMethod {
                             parameters(Context::class, Long::class)

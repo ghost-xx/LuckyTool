@@ -24,15 +24,22 @@ object DisableForcedBackupAppList : YukiBaseHooker() {
             ?: return
 
         //Source BackupRestoreOpt
-        "com.heytap.cloud.backuprestore.bswitch.BackupRestoreOpt".toClass().resolve().apply {
-            firstMethodOrNull { name = "getForceSelect" }?.hook {
-                replaceToFalse()
+        "com.heytap.cloud.backuprestore.bswitch.BackupRestoreOpt".toClassOrNull()?.resolve()
+            ?.apply {
+                firstMethodOrNull { name = "getForceSelect" }?.hook {
+                    replaceToFalse()
+                }
             }
-        }
+        "com.heytap.cloud.server.config.module.backup.bean.category.BackupCommonConfig"
+            .toClassOrNull()?.resolve()?.apply {
+                firstMethodOrNull { name = "isForceCheckRecoveryThirdData" }?.hook {
+                    replaceToFalse()
+                }
+            }
 
         //Source BackupRestoreOptUiData
-        "com.heytap.cloud.backuprestore.bswitch.bean.BackupRestoreOptUiData".toClass().resolve()
-            .apply {
+        "com.heytap.cloud.backuprestore.bswitch.bean.BackupRestoreOptUiData".toClassOrNull()
+            ?.resolve()?.apply {
                 firstMethod { name = "getOptStyle" }.hook {
                     before {
                         val optId = firstField { name = "optId" }.of(instance).get<String>()

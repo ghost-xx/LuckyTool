@@ -41,7 +41,9 @@ object HookPackageInstaller : YukiBaseHooker() {
             loadHooker(HookOPlusUninstallAppProgress(dexKitBridge))
 
             //禁止启动AppDetail
-            if (prefs(ModulePrefs).getBoolean("disable_start_app_detail", false)) {
+            if (prefs(ModulePrefs).getBoolean("disable_start_app_detail", false)
+                || prefs(ModulePrefs).getBoolean("dsiable_start_app_detail", false)
+            ) {
                 loadHooker(DisableStartAppDetail(dexKitBridge))
             }
             //修复App安装页面底部按钮异常

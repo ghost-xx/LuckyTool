@@ -39,8 +39,18 @@ class HookQuickSearchBoxMMKV(val dexKitBridge: DexKitBridge) : YukiBaseHooker() 
                         returnType(String::class.java)
                         usingStrings("getString")
                     }
+                }.let { found ->
+                    if (found.size == 1) found
+                    else findMethod {
+                        matcher {
+                            paramTypes(String::class.java, String::class.java)
+                            returnType(String::class.java)
+                            usingStrings("getString MMKV is null, return default")
+                        }
+                    }
                 }.apply {
                     checkDataList("HookMMKV find getString")
+                    if (size != 1) return@apply
                     single().className.toClass().resolve().apply {
                         firstMethod {
                             name = single().methodName
@@ -66,8 +76,18 @@ class HookQuickSearchBoxMMKV(val dexKitBridge: DexKitBridge) : YukiBaseHooker() 
                         returnType(Boolean::class.java)
                         usingStrings("getBoolean")
                     }
+                }.let { found ->
+                    if (found.size == 1) found
+                    else findMethod {
+                        matcher {
+                            paramTypes(String::class.java, Boolean::class.java)
+                            returnType(Boolean::class.java)
+                            usingStrings("getBoolean MMKV is null, return default")
+                        }
+                    }
                 }.apply {
                     checkDataList("HookMMKV find getBoolean")
+                    if (size != 1) return@apply
                     single().className.toClass().resolve().apply {
                         firstMethod {
                             name = single().methodName

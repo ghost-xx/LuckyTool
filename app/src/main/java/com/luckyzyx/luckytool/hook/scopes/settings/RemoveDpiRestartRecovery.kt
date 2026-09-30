@@ -42,28 +42,24 @@ class RemoveDpiRestartRecovery(val dexKitBridge: DexKitBridge) : YukiBaseHooker(
     class HookSettingsUtils(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
         override fun onHook() {
             //Source SettingsUtils
-            dexKitBridge.findClass {
-                matcher {
-                    addMethod {
-                        paramTypes(Context::class.java, Boolean::class.java)
-                    }
-                    addMethod {
-                        paramTypes(
-                            String::class.java,
-                            Int::class.java,
-                            Int::class.java,
-                            Boolean::class.java
-                        )
-                        usingStrings("restoreCompassPhoneDisplayDensity")
-                    }
-                    addMethod {
-                        paramTypes(Context::class.java, String::class.java, Int::class.java)
-                        usingStrings("restorePhoneDisplayDensity")
-                    }
-                    usingStrings("SettingsUtils")
-                }
-            }.apply {
-                checkDataList("RemoveDpiRestartRecovery Clazz")
+            val markers = listOf(
+                "restoreCompassPhoneDisplayDensity" to "restorePhoneDisplayDensity",
+                "restoreCompassPhoneDisplayDensity, defaultDensity = " to
+                        "restorePhoneDisplayDensity, initDensityIndex = "
+            )
+            val matched = markers.firstNotNullOfOrNull { (compassLog, phoneLog) ->
+                val found = findSettings(compassLog, phoneLog)
+                if (found.size == 1) Triple(found, compassLog, phoneLog) else null
+            }
+            if (matched == null) {
+                findSettings(
+                    "restoreCompassPhoneDisplayDensity, defaultDensity = ",
+                    "restorePhoneDisplayDensity, initDensityIndex = "
+                ).checkDataList("RemoveDpiRestartRecovery Clazz")
+                return
+            }
+            val (settings, compassLog, phoneLog) = matched
+            settings.apply {
                 findMethod {
                     matcher {
                         paramTypes(Context::class.java, Boolean::class.java)
@@ -72,15 +68,16 @@ class RemoveDpiRestartRecovery(val dexKitBridge: DexKitBridge) : YukiBaseHooker(
                                 String::class.java, Int::class.java,
                                 Int::class.java, Boolean::class.java
                             )
-                            usingStrings("restoreCompassPhoneDisplayDensity")
+                            usingStrings(compassLog)
                         }
                         addInvoke {
                             paramTypes(Context::class.java, String::class.java, Int::class.java)
-                            usingStrings("restorePhoneDisplayDensity")
+                            usingStrings(phoneLog)
                         }
                     }
                 }.apply {
                     checkDataList("RemoveDpiRestartRecovery Method")
+                    if (size != 1) return@apply
                     single().className.toClass().resolve().apply {
                         firstMethod {
                             name = single().methodName
@@ -90,6 +87,28 @@ class RemoveDpiRestartRecovery(val dexKitBridge: DexKitBridge) : YukiBaseHooker(
                         }
                     }
                 }
+            }
+        }
+
+        private fun findSettings(compassLog: String, phoneLog: String) = dexKitBridge.findClass {
+            matcher {
+                addMethod {
+                    paramTypes(Context::class.java, Boolean::class.java)
+                }
+                addMethod {
+                    paramTypes(
+                        String::class.java,
+                        Int::class.java,
+                        Int::class.java,
+                        Boolean::class.java
+                    )
+                    usingStrings(compassLog)
+                }
+                addMethod {
+                    paramTypes(Context::class.java, String::class.java, Int::class.java)
+                    usingStrings(phoneLog)
+                }
+                usingStrings("SettingsUtils")
             }
         }
     }

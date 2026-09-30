@@ -822,6 +822,8 @@
     <string name="disable_screenshot_packagename_md5_encrypt">禁用截图包名MD5加密</string>
     <string name="remove_ota_notify_install_success">移除OTA安装成功通知</string>
     <string name="remove_ota_auto_download_dialog">移除OTA自动下载对话框</string>
+    <string name="disable_system_update">关闭系统更新</string>
+    <string name="disable_system_update_summary">不再检查、下载和安装系统更新。重启软件更新后生效</string>
     <!--OplusOta-->
     <string name="get_ota_verify_result">已更改分区</string>
     <string name="get_ota_verify_result_summary">若要进行增量更新，请将以下分区恢复到官方镜像\n%1$s</string>

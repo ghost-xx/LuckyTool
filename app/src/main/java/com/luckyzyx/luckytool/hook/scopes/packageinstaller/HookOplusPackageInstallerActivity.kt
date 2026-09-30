@@ -64,13 +64,29 @@ class HookOplusPackageInstallerActivity(val dexKitBridge: DexKitBridge) : YukiBa
                     paramCount(0)
                     usingStrings("currentVersionCode", "apkVersioncode")
                 }
-            }.checkDataList("parseReplaceInstall").single()
+            }.let { found ->
+                if (found.size == 1) found.single()
+                else findMethod {
+                    matcher {
+                        paramCount(0)
+                        usingStrings(",apkVersioncode:")
+                    }
+                }.checkDataList("parseReplaceInstall").singleOrNull()
+            } ?: return
             val preSafeInstall = findMethod {
                 matcher {
                     paramCount(0)
                     usingStrings("startAppdetail", "reason")
                 }
-            }.checkDataList("parseReplaceInstall").single()
+            }.let { found ->
+                if (found.size == 1) found.single()
+                else findMethod {
+                    matcher {
+                        paramCount(0)
+                        usingStrings("startAppdetail: ")
+                    }
+                }.checkDataList("preSafeInstall").singleOrNull()
+            } ?: return
 
             val startInstallConfirm = findMethod {
                 matcher {

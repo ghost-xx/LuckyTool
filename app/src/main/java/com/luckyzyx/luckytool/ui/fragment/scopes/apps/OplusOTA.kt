@@ -54,6 +54,13 @@ class OplusOTA : BaseScopePreferenceFeagment() {
     override fun Context.loadPreferences(): ArrayList<Preference> {
         return ArrayList<Preference>().apply {
             add(SwitchPreference(this@loadPreferences).apply {
+                title = getString(R.string.disable_system_update)
+                summary = getString(R.string.disable_system_update_summary)
+                key = "disable_system_update"
+                setDefaultValue(false)
+                isIconSpaceReserved = false
+            })
+            add(SwitchPreference(this@loadPreferences).apply {
                 title = getString(R.string.remove_ota_notify_install_success)
                 key = "remove_ota_notify_install_success"
                 setDefaultValue(false)
