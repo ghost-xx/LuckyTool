@@ -74,7 +74,7 @@ object LockScreenBottomButton : YukiBaseHooker() {
 
             //Source KeyguardBottomAreaViewBinder
             "com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder".toClass()
-                .resolve().apply {
+                .resolve().optional().apply {
                     (firstMethodOrNull { name = "updateButton" }
                         ?: firstMethod { name { it.endsWith("updateButton") } }).hook {
                         before {

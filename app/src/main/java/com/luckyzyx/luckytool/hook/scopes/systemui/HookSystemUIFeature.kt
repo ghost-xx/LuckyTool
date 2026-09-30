@@ -61,7 +61,7 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
                 prefs(ModulePrefs).getBoolean("force_display_clock_style_options", false)
 
             //Source FeatureOption
-            "com.oplusos.systemui.common.feature.FeatureOption".toClass().resolve().apply {
+            "com.oplusos.systemui.common.feature.FeatureOption".toClass().resolve().optional().apply {
                 //C13 C14
                 firstMethodOrNull { name = "isOplusVolumeKeyInRight" }?.hook {
                     before {
@@ -143,7 +143,7 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
             }
 
             //Source FlavorOneFeatureOption
-            "com.oplusos.systemui.common.feature.FlavorOneFeatureOption".toClass().resolve().apply {
+            "com.oplusos.systemui.common.feature.FlavorOneFeatureOption".toClass().resolve().optional().apply {
                 firstMethodOrNull { name = "isSupportSearch" }?.hook {
                     before {
                         when (searchBtnMode) {
@@ -175,7 +175,7 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
             }
 
             //Source VolumeFeatureOption
-            "com.oplusos.systemui.common.feature.VolumeFeatureOption".toClass().resolve().apply {
+            "com.oplusos.systemui.common.feature.VolumeFeatureOption".toClass().resolve().optional().apply {
                 firstMethodOrNull { name = "isVolumeBlurDisabled" }?.hook {
                     if (volumeBlur > -1) replaceToFalse()
                 }

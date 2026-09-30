@@ -51,7 +51,7 @@ object HookDeviceProfileOption : YukiBaseHooker() {
         }
 
         //Source OplusInvariantDeviceProfile
-        "com.android.launcher3.OplusInvariantDeviceProfile".toClass().resolve().apply {
+        "com.android.launcher3.OplusInvariantDeviceProfile".toClass().resolve().optional().apply {
             method { name { it.startsWith("injectInitGrid") } }.hookAll {
                 after {
                     if (enableFolder) {

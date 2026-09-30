@@ -46,7 +46,7 @@ object MediaPlayerPanel : YukiBaseHooker() {
             //Source OplusQsMediaCarouselController
             val controller =
                 "com.oplus.systemui.qs.media.OplusQsMediaCarouselController".toClass().resolve()
-                    .apply {
+                    .optional().apply {
                         firstMethodOrNull { name = "setCurrentMediaData" }?.hook {
                             after {
                                 val status = when (mode) {
