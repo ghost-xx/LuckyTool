@@ -74,11 +74,20 @@ DexKit 的 `usingStrings` 是常量全字匹配。日志从 `getSplashData` 变�
 
 ## 关闭系统更新
 
-开关在软件更新页，键 `disable_system_update`。拦住 `com.oplus.ota.service.OTAService$d` 的 `startQueryUpdate`、`startDownload`、`startInstall`、`startABUpdate`。
+开关在软件更新页，键 `disable_system_update`。`DisableSystemUpdate` 在 `HookOplusOta` 的 DexKit 块里加载。
 
-`startQueryUpdate` 只是手动检查。拦住后界面会停在「正在检测更新」。同时改 `com.oplus.otaui.view.LoadingTextView`：文字用资源名 `no_update`（已是最新版本），隐藏进度圈。
+新版本提示的来源：`QueryOTAUpdateRunnable` 请求 `/update/v6`，回包的 `body` 是 AES 密文，`ResponseParser` 解密后写进 `state_info`（`update_state=1` 表示有新版本）。软件更新再用 `ContentResolver.insert` 往设置的 `content://com.android.settings.outward.provider/message_entries` 插一行，`package_name=com.oplus.ota`。设置首页直接读这张表，软件更新不运行也会显示。清软件更新的数据删不掉这一行。
 
-`notifyNewVersionUpdate` 不在上述方法里，定时检查仍可能发通知。用户追问推送时要说明这一点。
+现在的处理：
+
+- DexKit 找名为 `run`、用到字符串 `QueryOTAUpdateRunnable` 的方法并拦住，自动和手动检查都不再请求。
+- 拦 `ContentResolver.insert`：目标是 `message_entries` 且 `package_name` 是软件更新时丢弃。
+- 主进程 `onCreate` 时从 `state_info` 删掉 `update_state` 等新版本字段，再删掉设置表里软件更新那一行。`:ui` 进程的 `state_info` 由主进程代理，不要在那里改。
+- `OTAService$d` 的 `startQueryUpdate`、`startDownload`、`startInstall`、`startABUpdate` 照旧拦住。`LoadingTextView` 的文字改成资源名 `no_update`（已是最新版本），并隐藏进度圈。
+
+不要写死 `o4.d`、`com.oplus.common.a`、`com.oplus.ota.query.h` 这类混淆名，每个版本都会变。
+
+验证：`su -c "content query --uri content://com.android.settings.outward.provider/message_entries"`，看软件更新那一行还在不在。拉起软件更新要用 `su -c "am start -a com.oplus.ota.MAIN -p com.oplus.ota"`，shell 身份没有 `OPLUS_COMPONENT_SAFE` 权限。
 
 ## 更新日志
 

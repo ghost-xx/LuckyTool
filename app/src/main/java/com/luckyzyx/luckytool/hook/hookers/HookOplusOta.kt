@@ -20,10 +20,6 @@ object HookOplusOta : YukiBaseHooker() {
 
         loadHooker(HookGlobalSystemProperties)
 
-        if (prefs(ModulePrefs).getBoolean("disable_system_update", false)) {
-            loadHooker(DisableSystemUpdate)
-        }
-
         //local_update_failed_not_match 安装包不匹配
         //local_update_failed_read_exception 读取文件错误
         //local_update_failed_not_exist 文件不存在
@@ -33,6 +29,10 @@ object HookOplusOta : YukiBaseHooker() {
         //unzip_file_failed 解压失败
 
         DexkitUtils.create(appInfo.sourceDir) { dexKitBridge ->
+            //关闭系统更新
+            if (prefs(ModulePrefs).getBoolean("disable_system_update", false)) {
+                loadHooker(DisableSystemUpdate(dexKitBridge))
+            }
             //HookOTANotification
             loadHooker(HookNotificationHelper(dexKitBridge))
             //HookOTADialog
